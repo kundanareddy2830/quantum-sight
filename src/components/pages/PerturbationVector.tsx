@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
+import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { BarChart, Bar, XAxis, YAxis, ResponsiveContainer, Cell } from 'recharts';
@@ -7,7 +8,8 @@ import {
   Network, 
   BarChart3, 
   Zap,
-  Target
+  Target,
+  ChevronRight
 } from 'lucide-react';
 import { DEMO_DATA } from '@/data/mockData';
 
@@ -229,17 +231,30 @@ const PerturbationVector: React.FC<PerturbationVectorProps> = ({
           </motion.div>
         </div>
 
-        {/* Auto-play indicator */}
-        {isAutoPlaying && showVector && (
+        {/* Action buttons */}
+        {showVector && (
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            className="text-center"
+            className="text-center space-y-4"
           >
-            <Badge className="animate-pulse bg-quantum/20 text-quantum border-quantum/50">
-              <Zap className="h-3 w-3 mr-1" />
-              Proceeding to dimensionality reduction...
-            </Badge>
+            {!isAutoPlaying && (
+              <Button
+                onClick={() => onNext('pca')}
+                size="lg"
+                className="bg-gradient-neural hover:opacity-90 text-white"
+              >
+                <ChevronRight className="h-5 w-5 mr-2" />
+                Apply PCA Compression
+              </Button>
+            )}
+            
+            {isAutoPlaying && (
+              <Badge className="animate-pulse bg-quantum/20 text-quantum border-quantum/50">
+                <Zap className="h-3 w-3 mr-1" />
+                Proceeding to dimensionality reduction...
+              </Badge>
+            )}
           </motion.div>
         )}
       </div>

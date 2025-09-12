@@ -8,7 +8,8 @@ import {
   Zap, 
   ArrowRight,
   Target,
-  Clock
+  Clock,
+  ChevronRight
 } from 'lucide-react';
 import { DEMO_DATA } from '@/data/mockData';
 
@@ -161,17 +162,30 @@ const FraudRingDetection: React.FC<FraudRingDetectionProps> = ({
           )}
         </AnimatePresence>
 
-        {/* Auto-play indicator */}
-        {isAutoPlaying && showCluster && (
+        {/* Action buttons */}
+        {showCluster && (
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            className="text-center"
+            className="text-center space-y-4"
           >
-            <Badge className="animate-pulse bg-quantum/20 text-quantum border-quantum/50">
-              <Zap className="h-3 w-3 mr-1" />
-              Auto-analyzing...
-            </Badge>
+            {!isAutoPlaying && (
+              <Button
+                onClick={() => onNext('perturbation')}
+                size="lg"
+                className="bg-gradient-quantum hover:opacity-90 text-white"
+              >
+                <ChevronRight className="h-5 w-5 mr-2" />
+                Analyze Perturbation Vector
+              </Button>
+            )}
+            
+            {isAutoPlaying && (
+              <Badge className="animate-pulse bg-quantum/20 text-quantum border-quantum/50">
+                <Zap className="h-3 w-3 mr-1" />
+                Auto-analyzing...
+              </Badge>
+            )}
           </motion.div>
         )}
       </div>

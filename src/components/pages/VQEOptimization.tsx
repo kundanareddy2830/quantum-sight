@@ -8,8 +8,10 @@ import {
   Zap, 
   Activity,
   Target,
-  BarChart3
+  BarChart3,
+  ChevronRight
 } from 'lucide-react';
+import { Button } from "@/components/ui/button";
 import { DEMO_DATA } from '@/data/mockData';
 
 interface VQEOptimizationProps {
@@ -240,6 +242,31 @@ const VQEOptimization: React.FC<VQEOptimizationProps> = ({
                 </div>
               </CardContent>
             </Card>
+          </motion.div>
+        )}
+
+        {/* Action buttons */}
+        {showResults && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            className="text-center space-y-4"
+          >
+            <Button
+              onClick={() => onNext('forecast')}
+              size="lg"
+              className="bg-gradient-quantum hover:opacity-90 text-white"
+            >
+              <ChevronRight className="h-5 w-5 mr-2" />
+              Generate Final Forecast
+            </Button>
+            
+            {isAutoPlaying && (
+              <Badge className="animate-pulse bg-quantum/20 text-quantum border-quantum/50">
+                <Zap className="h-3 w-3 mr-1" />
+                Auto-advancing...
+              </Badge>
+            )}
           </motion.div>
         )}
 

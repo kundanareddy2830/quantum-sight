@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
+import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { ScatterChart, Scatter, XAxis, YAxis, ResponsiveContainer, Cell } from 'recharts';
@@ -7,7 +8,8 @@ import {
   Cpu, 
   Zap, 
   ArrowRight,
-  CircuitBoard
+  CircuitBoard,
+  ChevronRight
 } from 'lucide-react';
 import { DEMO_DATA } from '@/data/mockData';
 
@@ -226,17 +228,30 @@ const QuantumProcessing: React.FC<QuantumProcessingProps> = ({
           </motion.div>
         </div>
 
-        {/* Auto-play indicator */}
-        {isAutoPlaying && showScatter && (
+        {/* Action buttons */}
+        {showScatter && (
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            className="text-center"
+            className="text-center space-y-4"
           >
-            <Badge className="animate-pulse bg-quantum/20 text-quantum border-quantum/50">
-              <Zap className="h-3 w-3 mr-1" />
-              Building Hamiltonian risk map...
-            </Badge>
+            {!isAutoPlaying && (
+              <Button
+                onClick={() => onNext('hamiltonian')}
+                size="lg"
+                className="bg-gradient-quantum hover:opacity-90 text-white"
+              >
+                <ChevronRight className="h-5 w-5 mr-2" />
+                Build Risk Map
+              </Button>
+            )}
+            
+            {isAutoPlaying && (
+              <Badge className="animate-pulse bg-quantum/20 text-quantum border-quantum/50">
+                <Zap className="h-3 w-3 mr-1" />
+                Building Hamiltonian risk map...
+              </Badge>
+            )}
           </motion.div>
         )}
       </div>

@@ -96,18 +96,18 @@ const Dashboard: React.FC = () => {
     return () => clearTimeout(timer);
   }, [currentPage, analysisStep, isAutoPlaying]);
 
-  // Different durations for each step (minimum 30 seconds each)
+  // Different durations for each step (minimum 1 minute each)
   const getStepDuration = (page: PageType): number => {
     const durations = {
-      'fraud-ring': 30000,
-      'perturbation': 30000,
-      'pca': 30000,
-      'quantum': 30000,
-      'hamiltonian': 30000,
-      'vqe': 30000,
+      'fraud-ring': 60000,
+      'perturbation': 60000,
+      'pca': 60000,
+      'quantum': 60000,
+      'hamiltonian': 60000,
+      'vqe': 60000,
       'forecast': 0
     };
-    return durations[page] || 30000;
+    return durations[page] || 60000;
   };
 
   const renderCurrentPage = () => {
