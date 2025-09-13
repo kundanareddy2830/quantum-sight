@@ -1,228 +1,299 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { 
   ChevronRight, 
-  Play, 
-  RotateCcw, 
-  Activity, 
+  Database,
   Network, 
-  Zap, 
-  Cpu, 
   BrainCircuit,
+  Zap,
+  Cpu, 
+  BarChart3,
+  Settings,
   Shield,
-  AlertTriangle,
-  CheckCircle
+  CheckCircle,
+  AlertTriangle
 } from 'lucide-react';
 
-// Import all dashboard pages
-import LandingPage from './pages/LandingPage';
-import TransactionHistory from './pages/TransactionHistory';
-import GNNNetwork from './pages/GNNNetwork';
-import FraudRingDetection from './pages/FraudRingDetection';
-import PerturbationVector from './pages/PerturbationVector';
-import PCAReduction from './pages/PCAReduction';
-import QuantumProcessing from './pages/QuantumProcessing';
-import HamiltonianRiskMap from './pages/HamiltonianRiskMap';
-import VQEOptimization from './pages/VQEOptimization';
-import FinalForecast from './pages/FinalForecast';
-import ReplaySummary from './pages/ReplaySummary';
+// Import step components
+import DataInputStep from './steps/DataInputStep';
+import TransactionGraphStep from './steps/TransactionGraphStep';
+import GNNEmbeddingsStep from './steps/GNNEmbeddingsStep';
+import PCAReductionStep from './steps/PCAReductionStep';
+import QCLCircuitStep from './steps/QCLCircuitStep';
+import QuantumVectorStep from './steps/QuantumVectorStep';
+import HamiltonianStep from './steps/HamiltonianStep';
+import VQEOptimizationStep from './steps/VQEOptimizationStep';
+import RiskVerdictStep from './steps/RiskVerdictStep';
 
-type PageType = 
-  | 'landing'
-  | 'history' 
-  | 'network'
-  | 'fraud-ring'
-  | 'perturbation'
-  | 'pca'
-  | 'quantum'
+type StepType = 
+  | 'data-input'
+  | 'transaction-graph' 
+  | 'gnn-embeddings'
+  | 'pca-reduction'
+  | 'qcl-circuit'
+  | 'quantum-vector'
   | 'hamiltonian'
-  | 'vqe'
-  | 'forecast'
-  | 'replay';
+  | 'vqe-optimization'
+  | 'risk-verdict';
+
+interface Step {
+  id: StepType;
+  title: string;
+  description: string;
+  icon: React.ComponentType<any>;
+  tooltip: string;
+}
+
+const steps: Step[] = [
+  {
+    id: 'data-input',
+    title: 'Data Input',
+    description: 'Transaction data and selection',
+    icon: Database,
+    tooltip: 'Input recent transactions and select one for analysis'
+  },
+  {
+    id: 'transaction-graph',
+    title: 'Transaction Graph',
+    description: 'Network visualization',
+    icon: Network,
+    tooltip: 'Interactive graph showing account connections and transaction flows'
+  },
+  {
+    id: 'gnn-embeddings',
+    title: 'GNN Embeddings',
+    description: 'Perturbation vector creation',
+    icon: BrainCircuit,
+    tooltip: 'GNN creates embeddings and computes difference to identify anomalies'
+  },
+  {
+    id: 'pca-reduction',
+    title: 'PCA Reduction',
+    description: '16D → 4D compression',
+    icon: BarChart3,
+    tooltip: 'Principal Component Analysis reduces dimensions for quantum processing'
+  },
+  {
+    id: 'qcl-circuit',
+    title: 'QCL Circuit',
+    description: 'Quantum circuit parameters',
+    icon: Zap,
+    tooltip: 'Quantum Convolutional Layer circuit setup and parameter visualization'
+  },
+  {
+    id: 'quantum-vector',
+    title: 'Quantum Vector',
+    description: '4D → 2D quantum enhancement',
+    icon: Cpu,
+    tooltip: 'QCL produces quantum-enhanced 2D vector with hidden correlations'
+  },
+  {
+    id: 'hamiltonian',
+    title: 'Hamiltonian',
+    description: 'Risk map construction',
+    icon: Settings,
+    tooltip: 'Build Hamiltonian from quantum vector to create risk landscape'
+  },
+  {
+    id: 'vqe-optimization',
+    title: 'VQE Optimization',
+    description: 'Parameter optimization',
+    icon: AlertTriangle,
+    tooltip: 'Variational Quantum Eigensolver finds optimal energy configuration'
+  },
+  {
+    id: 'risk-verdict',
+    title: 'Risk Verdict',
+    description: 'Final probability & action',
+    icon: Shield,
+    tooltip: 'Final risk assessment with probability distribution and recommended action'
+  }
+];
 
 const Dashboard: React.FC = () => {
-  const [currentPage, setCurrentPage] = useState<PageType>('landing');
-  const [isAutoPlaying, setIsAutoPlaying] = useState(false);
-  const [analysisStep, setAnalysisStep] = useState(0);
+  const [currentStep, setCurrentStep] = useState<StepType>('data-input');
+  const [completedSteps, setCompletedSteps] = useState<Set<StepType>>(new Set());
 
-  // Auto-play sequence
-  const autoPlaySequence: PageType[] = [
-    'fraud-ring',
-    'perturbation', 
-    'pca',
-    'quantum',
-    'hamiltonian',
-    'vqe',
-    'forecast'
-  ];
-
-  const startAutoPlay = () => {
-    setCurrentPage('fraud-ring');
-    setIsAutoPlaying(true);
-    setAnalysisStep(0);
+  const handleStepComplete = (stepId: StepType) => {
+    setCompletedSteps(prev => new Set([...prev, stepId]));
+    
+    // Auto-advance to next step
+    const currentIndex = steps.findIndex(step => step.id === stepId);
+    if (currentIndex < steps.length - 1) {
+      setCurrentStep(steps[currentIndex + 1].id);
+    }
   };
 
-  const stopAutoPlay = () => {
-    setIsAutoPlaying(false);
-    setAnalysisStep(0);
+  const handleStepClick = (stepId: StepType) => {
+    setCurrentStep(stepId);
   };
 
   const resetDemo = () => {
-    setCurrentPage('landing');
-    setIsAutoPlaying(false);
-    setAnalysisStep(0);
+    setCurrentStep('data-input');
+    setCompletedSteps(new Set());
   };
 
-  // Auto-play progression
-  useEffect(() => {
-    if (!isAutoPlaying) return;
-
-    const timer = setTimeout(() => {
-      const nextStep = analysisStep + 1;
-      
-      if (nextStep < autoPlaySequence.length) {
-        setCurrentPage(autoPlaySequence[nextStep]);
-        setAnalysisStep(nextStep);
-      } else {
-        // End of auto-play sequence
-        setIsAutoPlaying(false);
-        setCurrentPage('forecast');
-      }
-    }, getStepDuration(currentPage));
-
-    return () => clearTimeout(timer);
-  }, [currentPage, analysisStep, isAutoPlaying]);
-
-  // Different durations for each step (minimum 1 minute each)
-  const getStepDuration = (page: PageType): number => {
-    const durations = {
-      'fraud-ring': 60000,
-      'perturbation': 60000,
-      'pca': 60000,
-      'quantum': 60000,
-      'hamiltonian': 60000,
-      'vqe': 60000,
-      'forecast': 0
-    };
-    return durations[page] || 60000;
-  };
-
-  const renderCurrentPage = () => {
-    const pageProps = {
-      onNext: (nextPage: PageType) => setCurrentPage(nextPage),
-      onStartAnalysis: startAutoPlay,
-      isAutoPlaying
+  const renderCurrentStep = () => {
+    const stepProps = {
+      onComplete: () => handleStepComplete(currentStep),
+      onNext: (nextStep: StepType) => setCurrentStep(nextStep),
+      isCompleted: completedSteps.has(currentStep)
     };
 
-    switch (currentPage) {
-      case 'landing':
-        return <LandingPage {...pageProps} />;
-      case 'history':
-        return <TransactionHistory {...pageProps} />;
-      case 'network':
-        return <GNNNetwork {...pageProps} />;
-      case 'fraud-ring':
-        return <FraudRingDetection {...pageProps} />;
-      case 'perturbation':
-        return <PerturbationVector {...pageProps} />;
-      case 'pca':
-        return <PCAReduction {...pageProps} />;
-      case 'quantum':
-        return <QuantumProcessing {...pageProps} />;
+    switch (currentStep) {
+      case 'data-input':
+        return <DataInputStep {...stepProps} />;
+      case 'transaction-graph':
+        return <TransactionGraphStep {...stepProps} />;
+      case 'gnn-embeddings':
+        return <GNNEmbeddingsStep {...stepProps} />;
+      case 'pca-reduction':
+        return <PCAReductionStep {...stepProps} />;
+      case 'qcl-circuit':
+        return <QCLCircuitStep {...stepProps} />;
+      case 'quantum-vector':
+        return <QuantumVectorStep {...stepProps} />;
       case 'hamiltonian':
-        return <HamiltonianRiskMap {...pageProps} />;
-      case 'vqe':
-        return <VQEOptimization {...pageProps} />;
-      case 'forecast':
-        return <FinalForecast {...pageProps} />;
-      case 'replay':
-        return <ReplaySummary {...pageProps} />;
+        return <HamiltonianStep {...stepProps} />;
+      case 'vqe-optimization':
+        return <VQEOptimizationStep {...stepProps} />;
+      case 'risk-verdict':
+        return <RiskVerdictStep {...stepProps} />;
       default:
-        return <LandingPage {...pageProps} />;
+        return <DataInputStep {...stepProps} />;
     }
   };
 
   return (
-    <div className="min-h-screen bg-background relative overflow-hidden">
-      {/* Background gradient */}
-      <div className="absolute inset-0 bg-gradient-to-br from-background via-background-secondary to-background opacity-80" />
-      
-      {/* Navigation bar */}
-      <nav className="relative z-10 border-b border-border/50 backdrop-blur-sm bg-background/80">
-        <div className="container mx-auto px-4 py-4 flex items-center justify-between">
-          <div className="flex items-center space-x-4">
-            <div className="flex items-center space-x-2">
-              <BrainCircuit className="h-6 w-6 text-quantum" />
-              <h1 className="text-xl font-bold text-foreground">Project Foresight</h1>
+    <TooltipProvider>
+      <div className="min-h-screen bg-background flex">
+        {/* Side Navigation */}
+        <nav className="w-80 bg-card border-r border-border flex flex-col">
+          {/* Header */}
+          <div className="p-6 border-b border-border">
+            <div className="flex items-center space-x-3 mb-2">
+              <BrainCircuit className="h-8 w-8 text-quantum" />
+              <div>
+                <h1 className="text-xl font-bold text-foreground">Project Foresight</h1>
+                <p className="text-sm text-muted-foreground">Hybrid Fraud Detection</p>
+              </div>
             </div>
-            <Badge variant="outline" className="text-quantum border-quantum/50">
-              Hybrid Fraud Forecast
-            </Badge>
-          </div>
-          
-          <div className="flex items-center space-x-2">
-            {isAutoPlaying && (
-              <Badge className="animate-pulse bg-quantum/20 text-quantum border-quantum/50">
-                <Activity className="h-3 w-3 mr-1" />
-                Analyzing...
-              </Badge>
-            )}
-            
             <Button
               variant="outline"
               size="sm"
               onClick={resetDemo}
-              className="text-muted-foreground hover:text-foreground"
+              className="w-full mt-3"
             >
-              <RotateCcw className="h-4 w-4 mr-1" />
-              Reset
+              Reset Demo
             </Button>
           </div>
-        </div>
-      </nav>
 
-      {/* Main content */}
-      <main className="relative z-10">
-        <AnimatePresence mode="wait">
-          <motion.div
-            key={currentPage}
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -20 }}
-            transition={{ duration: 0.4, ease: "easeInOut" }}
-            className="w-full"
-          >
-            {renderCurrentPage()}
-          </motion.div>
-        </AnimatePresence>
-      </main>
+          {/* Steps */}
+          <div className="flex-1 p-4 space-y-2">
+            {steps.map((step, index) => {
+              const Icon = step.icon;
+              const isActive = currentStep === step.id;
+              const isCompleted = completedSteps.has(step.id);
+              const isAccessible = index === 0 || completedSteps.has(steps[index - 1].id);
 
-      {/* Progress indicator for auto-play */}
-      {isAutoPlaying && (
-        <div className="fixed bottom-4 left-1/2 transform -translate-x-1/2 z-20">
-          <Card className="card-quantum">
-            <CardContent className="p-4 flex items-center space-x-4">
-              <div className="flex items-center space-x-2">
-                {autoPlaySequence.map((step, index) => (
-                  <div
-                    key={step}
-                    className={`w-2 h-2 rounded-full transition-colors duration-300 ${
-                      index <= analysisStep ? 'bg-quantum' : 'bg-muted'
-                    }`}
-                  />
-                ))}
+              return (
+                <Tooltip key={step.id}>
+                  <TooltipTrigger asChild>
+                    <button
+                      onClick={() => isAccessible && handleStepClick(step.id)}
+                      disabled={!isAccessible}
+                      className={`w-full p-4 rounded-lg text-left transition-all duration-200 border ${
+                        isActive 
+                          ? 'bg-quantum/10 border-quantum text-quantum' 
+                          : isCompleted
+                          ? 'bg-success/10 border-success/50 text-success hover:bg-success/20'
+                          : isAccessible
+                          ? 'bg-card border-border hover:bg-muted/50 text-foreground'
+                          : 'bg-muted/30 border-muted text-muted-foreground cursor-not-allowed'
+                      }`}
+                    >
+                      <div className="flex items-center space-x-3">
+                        <div className={`p-2 rounded-lg ${
+                          isActive 
+                            ? 'bg-quantum text-quantum-foreground' 
+                            : isCompleted
+                            ? 'bg-success text-success-foreground'
+                            : 'bg-muted text-muted-foreground'
+                        }`}>
+                          {isCompleted ? (
+                            <CheckCircle className="h-5 w-5" />
+                          ) : (
+                            <Icon className="h-5 w-5" />
+                          )}
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center space-x-2">
+                            <span className="text-xs font-medium text-muted-foreground">
+                              {String(index + 1).padStart(2, '0')}
+                            </span>
+                            <h3 className="font-semibold text-sm truncate">{step.title}</h3>
+                          </div>
+                          <p className="text-xs text-muted-foreground mt-1">{step.description}</p>
+                        </div>
+                        {isActive && (
+                          <ChevronRight className="h-4 w-4 text-quantum" />
+                        )}
+                      </div>
+                    </button>
+                  </TooltipTrigger>
+                  <TooltipContent side="right" className="max-w-xs">
+                    <p>{step.tooltip}</p>
+                  </TooltipContent>
+                </Tooltip>
+              );
+            })}
+          </div>
+
+          {/* Progress */}
+          <div className="p-4 border-t border-border">
+            <div className="space-y-2">
+              <div className="flex justify-between text-sm">
+                <span className="text-muted-foreground">Progress</span>
+                <span className="text-foreground font-medium">
+                  {completedSteps.size}/{steps.length}
+                </span>
               </div>
-              <span className="text-sm text-muted-foreground">
-                Step {analysisStep + 1} of {autoPlaySequence.length}
-              </span>
-            </CardContent>
-          </Card>
-        </div>
-      )}
-    </div>
+              <div className="w-full bg-muted rounded-full h-2">
+                <div 
+                  className="bg-quantum h-2 rounded-full transition-all duration-300"
+                  style={{ width: `${(completedSteps.size / steps.length) * 100}%` }}
+                />
+              </div>
+            </div>
+          </div>
+        </nav>
+
+        {/* Main Content */}
+        <main className="flex-1 relative overflow-hidden">
+          {/* Background gradient */}
+          <div className="absolute inset-0 bg-gradient-to-br from-background via-background-secondary to-background opacity-80" />
+          
+          <div className="relative z-10 h-full">
+            <AnimatePresence mode="wait">
+              <motion.div
+                key={currentStep}
+                initial={{ opacity: 0, x: 20 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: -20 }}
+                transition={{ duration: 0.3, ease: "easeInOut" }}
+                className="h-full"
+              >
+                {renderCurrentStep()}
+              </motion.div>
+            </AnimatePresence>
+          </div>
+        </main>
+      </div>
+    </TooltipProvider>
   );
 };
 

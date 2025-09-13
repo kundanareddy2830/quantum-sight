@@ -105,3 +105,30 @@ export const DEMO_DATA = {
     suspicious: { x: 0.1538, y: 0.0358, label: "Suspicious" }
   }
 };
+
+// Export convenience aliases
+export const mockTransactions = DEMO_DATA.transactionHistory.map(tx => ({
+  ...tx,
+  type: 'Transfer'
+}));
+
+export const mockNetworkData = {
+  nodes: DEMO_DATA.networkGraph.nodes.map(node => ({
+    ...node,
+    x: Math.random() * 700 + 50,
+    y: Math.random() * 400 + 50,
+    suspicious: node.type === 'suspicious',
+    important: node.type === 'primary'
+  })),
+  edges: DEMO_DATA.networkGraph.edges.map(edge => ({
+    ...edge,
+    source: { 
+      x: Math.random() * 700 + 50, 
+      y: Math.random() * 400 + 50 
+    },
+    target: { 
+      x: Math.random() * 700 + 50, 
+      y: Math.random() * 400 + 50 
+    }
+  }))
+};
